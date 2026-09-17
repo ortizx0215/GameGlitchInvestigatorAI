@@ -33,21 +33,36 @@ It wrote the code, ran away, and now the game is unplayable.
 
 Describe your fixed game in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. Users enters a guess of 40
+2. Game returns too low
+3. User enters a guess of 70 -> "Too Low"
+4. Attempts update correctly
+5. New game does not start up if you don't win after the 8 guesses
 
 **Screenshot** *(optional)*: <!-- Insert a screenshot of your fixed, winning game here -->
 
 ## 🧪 Test Results
 
 ```
-# Paste your pytest output here, e.g.:
-# pytest tests/
-# ========================= X passed in 0.XXs =========================
+$ python3 -m pytest tests/ -v
+
+============================= test session starts ==============================
+platform darwin -- Python 3.13.3, pytest-9.1.1, pluggy-1.6.0
+cachedir: .pytest_cache
+rootdir: /Users/vyeagra/Desktop/COSC491/GameGlitchInvestigatorAI
+plugins: anyio-4.15.1
+collecting ... collected 3 items
+
+tests/test_game_logic.py::test_winning_guess PASSED                      [ 33%]
+tests/test_game_logic.py::test_guess_too_high PASSED                     [ 66%]
+tests/test_game_logic.py::test_guess_too_low PASSED                      [100%]
+
+============================== 3 passed in 0.01s ===============================
 ```
+
+These 3 tests only cover `check_guess`. The scoring, the New Game reset, and
+`parse_guess` are not covered by the test suite, so I checked those by playing
+the game manually.
 
 ## 🚀 Stretch Features
 
