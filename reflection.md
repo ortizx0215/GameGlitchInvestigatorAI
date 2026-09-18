@@ -5,7 +5,7 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 ## 1. What was broken when you started?
 
 - The game looked good. It seemed like it worked, but then it didn't. The interface was easy to navigate thru.
-- The new game button didn't work when I didn't guess properly. And some of the hints didn't work. Also I noticed that some of the hints would be inconsistent.
+- The new game button didn't work when I didn't guess properly. Hard mode only had a range of 1 - 50 thus making it easier than 'Normal'. Also I noticed that some of the hints would be inconsistent.
 
 **Bug Reproduction Log**
 
@@ -13,28 +13,32 @@ Document at least 3 bugs you found. Add rows as needed.
 
 | Input | Expected Behavior | Actual Behavior | Console Output / Error |
 |-------|-------------------|-----------------|------------------------|
-| Win a game, then click "New Game 🔁" | Fresh secret number, attempts back to full, board playable again | Screen stays on "You already won. Start a new game to play again." Typing a guess does nothing. Same thing happens after losing. | No error. The reset only cleared `secret` and `attempts`, so `status` stayed `"won"` in session state and `st.stop()` ran again on the next rerun. |
-| Secret is 42, guess 70 | "Go LOWER" | "📈 Go HIGHER!" | No error. Both hint messages were attached to the wrong branch. |
-| Secret is 100, guess 9 on an even-numbered attempt | "Go HIGHER" | "📉 Go LOWER!" | No error. On even attempts the secret was turned into text, so the comparison was `"9" > "100"`, which is true the way "zebra" comes after "apple". The `TypeError` was caught inside the function, so nothing printed. |
-| Start on Normal (secret 87), switch difficulty to Easy (range 1-20) | New game with a secret inside 1-20 | Secret stays 87, which is outside the range, so the game cannot be won | No error. The secret was only generated once and never regenerated on a difficulty change. |
-| Load the game on Normal, before guessing | "Attempts left: 8" | "Attempts left: 7" | No error. `attempts` was initialized to 1 instead of 0. |
-| Type `abc`, click Submit Guess | Error message, attempt not counted | "That is not a number." and "Attempts left" drops by one anyway | No error. `attempts` was incremented before the input was validated. |
-| Hard mode: 7 wrong guesses, then the correct one | A win should give a positive score | Final score: -15 | No error. Each miss cost 15 points (-5 directly, -10 off the decaying win bonus), and the formula ignored difficulty, so a well-played Hard game finished negative. |
-| Any "Too High" guess on an even-numbered attempt | Score goes down 5 | Score goes **up** 5 | No error. The scoring function had an `attempt_number % 2` branch that added points instead of subtracting. |
+|Bug 1:
+ Win or lose game, the New Game button didn't refresh the page making replayability nonexistent 
+|
+| Bug 2:
+Hints were inconsistent; sometimes it would just say Go higher or go lower 
+The secret was 47 and I guessed 40, but it told me to go lower instead of go higher.
+Bug 3:
+Hard mode range wasn't harder than normal. Normal range was from 1 - 100 and Hard was 1 - 50. 
+I expected hard mode to have a higher range of numbers than Normal so we fixed it from 1 - 50 to 1 - 200.
 
-Note: none of these bugs raised an exception or printed anything to the console. They were all silent logic errors, which is why the game looked like it worked at first.
-
+Bug 4: 
+Beforehand, switching difficulties would not give you your attempts back making the game harder, I expected to get a fresh 8 attempts, but after going thru what was "broken", we fixed that problem so now every time you switch difficulties, you get a new set of attempts.
 ---
 
 ## 2. How did you use AI as a teammate?
 
-- So I used Claude code to help me find what didn't work. I had it explain to me why it didn't work and suggest other ways I could have the code work. The suggestions it gave was actually really helpful and I also had it explain the pros for each suggestion. Also, I rejected the idea that we have negative scores because that's what it suggested.
+- So I used Claude code to help me find what didn't work. I had it explain to me why it didn't work and suggest other ways I could have the code work. The suggestions it gave was actually really helpful and I also had it explain the pros for each suggestion. Before the fix, switching between the difficulties would NOT reset the game, but after the fix and the suggestion of claude, it fixed that problem so now everytime you switch difficulties, the game is essentially reset. I went back to the website and ran the game again to make sure it met the expected behavior. 
+
+Claude suggested that we deduct points for every wrong guess, however, I was not a fan of the idea so I rejected the suggestion and kept the + point.
 
 ---
 
 ## 3. Debugging and testing your fixes
 
 - I actually tested the game manually to see if any of the bugs that I was looking for specifically was fixed. I also had claude check for other glitches that could be fixed. One specific example as the point system. I noticed that it was doing negative scores and I didn't want that so I fixed it up.
+- I added my own test for the negative score bug and it passed, but then I learned that a test passing doesn't always prove much. My test only called the scoring function one time for the win, and the negative score actually came from adding up all the wrong guesses before it, so my test would have passed even on the broken code. It also made me realize the 3 tests that came with the project only check the check_guess function, so they never would have caught the New Game bug I found in the first place. The lesson for me was that a test has to repeat the same steps I did when I actually ran into the bug, otherwise it is just passing for no reason.
 
 ---
 
